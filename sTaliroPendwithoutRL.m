@@ -1,18 +1,5 @@
-function QlearnPend
-%% Example reinforcement learning - Q-learning code
-% Learn a control policy to optimally swing a pendulum from vertical down,
-% to vertical up with torque limits and (potentially) noise. Both the
-% pendulum and the policy are animated as the process is going. The
-% difference from dynamic programming, for instance, is that the policy is
-% learned only by doing forward simulation. No knowledge of the dynamics is
-% used to make the policy.
-%   
-% Play around with the learning settings below. I'm sure they could be
-% improved greatly!
-%
-%   Video: https://www.youtube.com/watch?v=YLAWnYAsai8
-%
-%   Matthew Sheen, 2015
+function sTaliroPendwithoutRL
+%% STaliro without RL
 %
 
 close all;
