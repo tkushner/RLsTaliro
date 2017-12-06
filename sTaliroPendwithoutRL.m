@@ -4,7 +4,10 @@ function sTaliroPendwithoutRL
 % (1) function - I think rewardFunc is the right thought, except we want to
 % go "bigger" - like we want the whole pendulum with the pushing aspect too
 % (like the function has to be state space & time, and right now its just
-% reward value in space) but we want the whole pendulum 
+% reward value in space) but we want the whole pendulum. (we can do the
+% simulink model of the pendulum? bc staliro takes simulink models and it
+% seems straightforward enough to make the pendulum in simulink - easy
+% google how to)
 % (2) cparray - control points that parameterize the input signal. So our
 % input is "push left, push right, don't push"  my two guesses are either 
 %       (a) array[n,1] where n is the number of times we let an action
