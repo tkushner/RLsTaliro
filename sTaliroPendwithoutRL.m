@@ -1,6 +1,27 @@
 function sTaliroPendwithoutRL
 %% STaliro without RL
-%
+% Things that are weird
+% (1) function - I think rewardFunc is the right thought, except we want to
+% go "bigger" - like we want the whole pendulum with the pushing aspect too
+% (like the function has to be state space & time, and right now its just
+% reward value in space) but we want the whole pendulum 
+% (2) cparray - control points that parameterize the input signal. So our
+% input is "push left, push right, don't push"  my two guesses are either 
+%       (a) array[n,1] where n is the number of times we let an action
+%       happen within our time window and 1 because we have 3 different
+%       inputs (except I think left is negative, right is positive and no
+%       move is zero?) 
+%       (b) just array[1] because you can only do one action? (ie push)
+% (3) phi - Ok so phi is woreded in terms of falsification which we want to
+% find phi = '!(<>[0,0], x)' (except that instead of phi is bad, we want
+% phi is good so I think if we just take that phi and then reverse our
+% output map, it'll work?)
+% (4) preds - ughhh this is trickier... its like, the mapping of positions
+% x to their state in space? it has to do with phi, so if we say 'x' in
+% phi, i think we need to be like 'this is what x actually is in our model'
+% in the preds part (type <help dp_taliro> in command line to read more
+% about it)
+%       
 
 close all;
 
@@ -174,8 +195,11 @@ pathmap = plot(NaN,NaN,'.g','MarkerSize',30); % The green marker that travels th
 map.CData = V;
 hold off
 
+%% Staliro
+z1=startPt;
+results = staliro(rewardFunc, z1, input_range, cp_array, [], preds, 1, opt);
+
 %% Start learning!
-% results = staliro(rewardFunc, z1, input_range, cp_array, [], preds, 1, opt);
 % Number of episodes or "resets"
 for episodes = 1:maxEpi
     
