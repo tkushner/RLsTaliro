@@ -31,7 +31,8 @@ close all;
 %% SETTINGS
 
 %%% What do we call good?
-rewardFunc = @(t, y, x)(-(abs(x(1))).^2 + -0.25*(abs(x(2))).^2); % Reward is -(quadratic error) from upright position. Play around with different things!
+rewardFunc = @(t, y, x)(-(abs(x(1))).^2 + -0.25*(abs(x(2)*t)).^2); % Reward is -(quadratic error) from upright position. Play around with different things!
+rewardFunc = @(t, x, xdot)(-(abs(x)).^2 + -0.25*(abs(xdot*t)).^2); % Reward is -(quadratic error) from upright position. Play around with different things!
 
 %%% Confidence in new trials?
 learnRate = 0.99; % How is new value estimate weighted against the old (0-1). 1 means all new and is ok for no noise situations.
@@ -54,7 +55,8 @@ successRate = 1; % How often do we do what we intend to do?
 winBonus = 100;  % Option to give a very large bonus when the system reaches the desired state (pendulum upright).
 
 startPt = [pi, 0]; % Start every episode at vertical down.
-input_range = [-pi pi; -pi pi]; % Inputs are bound between these values.
+input_range = [-pi pi]; % Inputs are bound between these values.
+time = 1; % Time step
 
 maxEpi = 2000; % Each episode is starting with the pendulum down and doing continuous actions for awhile.
 maxit = 1500; % Iterations are the number of actions taken in an episode.
@@ -64,13 +66,16 @@ dt = 0.05; % Timestep of integration. Each substep lasts this long
 % Torque limits -- bang-bang control
 tLim = 1;
 actions = [0, -tLim, tLim]; % Only 3 options, Full blast one way, the other way, and off.
-cp_array = [3; 3]; % Number of 'control points' for each input. Not sure about this.
+cp_array = 3; % Number of 'control points' for each input. Not sure about this.
 
 % Create an S-Taliro options object
 opt = staliro_options();
+opt.optim_params.n_tests = 500;
 opt.optimization_solver = 'SA_Taliro';
+opt.taliro = 'dp_taliro';
 opt.falsification = 0;
-opt.parameterEstimation = 1;
+%opt.parameterEstimation = 1;
+opt.optimization = 'max';
 opt.runs = 1;
 
 ii = 1;
@@ -79,13 +84,14 @@ preds(ii).b = 0;
 preds(ii).value = 0;
 preds(ii).range = [-pi pi];
 
-ii = ii+1;
-preds(ii).par = 'r2';
-preds(ii).b = 0;
-preds(ii).value = 0;
-preds(ii).range = [-pi pi];
+% ii = ii+1;
+% preds(ii).par = 'r2';
+% preds(ii).A = [0 -1]
+% preds(ii).b = 0;
+% preds(ii).value = 0;
+% preds(ii).range = [-pi pi];
 
-phi = ['<>(r1 -> r2)'; '<>(r1 /\ r2)'];
+phi = '(<> !r1)';
 
 % Make the un-updated values on the value map transparent. If not, then
 % we see the reward function underneath.
@@ -139,7 +145,7 @@ R = zeros(length(x1)*length(x2), 1);
 index=1;
 for j=1:length(x1)
     for k = 1:length(x2)
-        R(index,1) = rewardFunc(0, 0, [states(index, 1), states(index, 2)]);
+        R(index,1) = rewardFunc(0,states(index, 1), states(index, 2));
         index=index+1;
     end
 end
@@ -199,8 +205,8 @@ map.CData = V;
 hold off
 
 %% Staliro
-z1=startPt;
-results = staliro(rewardFunc, z1, input_range, cp_array, [], preds, 1, opt);
+% z1 = startPt;
+% results = staliro(rewardFunc, z1, input_range, cp_array, [], preds, 1, opt);
 
 %% Start learning!
 % Number of episodes or "resets"
@@ -215,7 +221,7 @@ for episodes = 1:maxEpi
         if ~ishandle(panel)
             break;
         end
-        results = staliro(rewardFunc, z1, input_range, cp_array, phi, preds, 1, opt);
+        results = staliro(rewardFunc, z1, input_range, cp_array, phi, preds, time, opt);
         disp(results)
         %% PICK AN ACTION
         
