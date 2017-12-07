@@ -79,7 +79,8 @@ opt.optimization = 'max';
 opt.runs = 1;
 
 ii = 1;
-preds(ii).par = 'r1';
+preds(ii).str = 'r1';
+preds(ii).A = [-1];
 preds(ii).b = 0;
 preds(ii).value = 0;
 preds(ii).range = [-pi pi];
