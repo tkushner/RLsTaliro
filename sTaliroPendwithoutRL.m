@@ -70,7 +70,7 @@ cp_array = 3; % Number of 'control points' for each input. Not sure about this.
 
 % Create an S-Taliro options object
 opt = staliro_options();
-opt.optim_params.n_tests = 500;
+opt.optim_params.n_tests = 100;
 opt.optimization_solver = 'SA_Taliro';
 opt.taliro = 'dp_taliro';
 opt.falsification = 0;
@@ -82,7 +82,7 @@ ii = 1;
 preds(ii).str = 'r1';
 preds(ii).A = [-1];
 preds(ii).b = 0;
-preds(ii).value = 0;
+preds(ii).value = pi/2;
 preds(ii).range = [-pi pi];
 
 % ii = ii+1;

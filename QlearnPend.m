@@ -1,4 +1,4 @@
-function QlearnPendwithTaliro
+function QlearnPend
 %% Example reinforcement learning - Q-learning code
 % Learn a control policy to optimally swing a pendulum from vertical down,
 % to vertical up with torque limits and (potentially) noise. Both the
@@ -16,10 +16,9 @@ function QlearnPendwithTaliro
 %
 
 close all;
-clear;
 
 %% SETTINGS
-%% *Reinforcment Learning*
+
 %%% What do we call good?
 rewardFunc = @(x,xdot)(-(abs(x)).^2 + -0.25*(abs(xdot)).^2); % Reward is -(quadratic error) from upright position. Play around with different things!
 
@@ -54,30 +53,6 @@ dt = 0.05; % Timestep of integration. Each substep lasts this long
 tLim = 1;
 actions = [0, -tLim, tLim]; % Only 3 options, Full blast one way, the other way, and off.
 
-%% *sTaliro*
-g=1; l=1;
-model = @(t,x,u) [x(2); -g/l * sin(x(1))];
-
-init_cond = [-pi/2, pi/2; -pi/2, pi/2];
-input_range = [];
-cp_array = [];
-
-phi = '[]!a';
-
-ii = 1;
-preds(ii).str='a';
-preds(ii).A = [1,0; 0,1];
-preds(ii).b = [-pi; -pi];
-
-time = 2;
-
-opt = staliro_options();
-opt.runs = 1;
-opt.spec_space = 'X';
-opt.ode_solver = 'ode45';
-opt.falsification=0;
-opt.optimization_solver = 'UR_Taliro';
-opt.optim_params.n_tests = 50;
 
 % Make the un-updated values on the value map transparent. If not, then
 % we see the reward function underneath.
@@ -208,26 +183,9 @@ for episodes = 1:maxEpi
         if (rand()>epsilon || episodes == maxEpi) && rand()<=successRate % Pick according to the Q-matrix it's the last episode or we succeed with the rand()>epsilon check. Fail the check if our action doesn't succeed (i.e. simulating noise)
             [~,aIdx] = max(Q(sIdx,:)); % Pick the action the Q matrix thinks is best!
         else
-            % Use sTaliro to get falsifying trajectory
-            [results, history] = staliro(model, init_cond, input_range, cp_array, phi, preds, time, opt);
-            bestRun = results.optRobIndex;
-            
-            % Convert this bestRun into an action: either go right, left or stay
-            % If sTaliro suggests a point where theta is larger than my
-            % current location, move right. Otherwise, left. Or stay in the
-            % same spot.
-            x = (results.run(bestRun).bestSample);
-            if x(1) > z1(1)
-                aIdx = 3;
-            elseif x(1) < z1(1)
-                aIdx = 2;
-            else
-                aIdx = 1;
-            end
-            
             aIdx = randi(length(actions),1); % Random action!
         end
-        %actions = [0, -tLim, tLim];
+        
         T = actions(aIdx);
         
         %% STEP DYNAMICS FORWARD
