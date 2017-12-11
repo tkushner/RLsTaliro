@@ -14,7 +14,7 @@ input_range = [-1,1];
 cp_array = [30];
 
 %phi = '[]!(a)';
-phi = '<>_[20,40) a \/b ';
+phi = '<>_[20,40) a ';
 
 ii = 1;
 preds(ii).str='a';

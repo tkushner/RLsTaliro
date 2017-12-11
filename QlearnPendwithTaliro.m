@@ -1,27 +1,48 @@
-function QlearnPendwithTaliro
-%% Example reinforcement learning - Q-learning code
-% Learn a control policy to optimally swing a pendulum from vertical down,
-% to vertical up with torque limits and (potentially) noise. Both the
-% pendulum and the policy are animated as the process is going. The
-% difference from dynamic programming, for instance, is that the policy is
-% learned only by doing forward simulation. No knowledge of the dynamics is
-% used to make the policy.
-%   
-% Play around with the learning settings below. I'm sure they could be
-% improved greatly!
-%
-%   Video: https://www.youtube.com/watch?v=YLAWnYAsai8
-%
-%   Matthew Sheen, 2015
-%
+%PendulumWithTaliro Taisa version
 
 close all;
-clear;
 
+%% sTaliro to get reward function
+
+g=1;
+l=1;
+model = @(t,x,u) [x(2); g/l*sin(x(1))+u(1)];
+%model= @(t,x,u) [x(2); -a * x(1) - drag * x(2) + Amp * sin(1.2*t)];
+
+init_cond = [-pi,pi;-3,3];
+input_range = [-1,1];
+cp_array = [30];
+
+%phi = '[]!(a)';
+phi = '<>_[20,40) a';
+
+ii = 1;
+preds(ii).str='a';
+preds(ii).A = [0,-1];
+preds(ii).b = [-2];
+
+ii = 2;
+preds(ii).str='b';
+preds(ii).A = [0,-1];
+preds(ii).b = [2];
+
+time = 50;
+
+opt = staliro_options();
+
+opt.runs = 1;
+opt.spec_space = 'X';
+opt.ode_solver = 'ode45';
+opt.falsification=0;
+opt.optimization_solver = 'UR_Taliro';
+opt.optim_params.n_tests = 10;
+
+%% RL with Taliro
 %% SETTINGS
-%% *Reinforcment Learning*
+
 %%% What do we call good?
-rewardFunc = @(x,xdot)(-(abs(x)).^2 + -0.25*(abs(xdot)).^2); % Reward is -(quadratic error) from upright position. Play around with different things!
+%rewardFunc = @(x,xdot)(-(abs(x)).^2 + -0.25*(abs(xdot)).^2); % Reward is -(quadratic error) from upright position. Play around with different things!
+rewardFunc = @(x,xdot)((2-abs(xdot)).^2) %quad error from velocity at 2
 
 %%% Confidence in new trials?
 learnRate = 0.99; % How is new value estimate weighted against the old (0-1). 1 means all new and is ok for no noise situations.
@@ -43,7 +64,7 @@ successRate = 1; % How often do we do what we intend to do?
 
 winBonus = 100;  % Option to give a very large bonus when the system reaches the desired state (pendulum upright).
 
-startPt = [pi,0]; % Start every episode at vertical down.
+startPt = [pi/2,0]; % Start every episode at vertical down.
 
 maxEpi = 2000; % Each episode is starting with the pendulum down and doing continuous actions for awhile.
 maxit = 1500; % Iterations are the number of actions taken in an episode.
@@ -53,31 +74,6 @@ dt = 0.05; % Timestep of integration. Each substep lasts this long
 % Torque limits -- bang-bang control
 tLim = 1;
 actions = [0, -tLim, tLim]; % Only 3 options, Full blast one way, the other way, and off.
-
-%% *sTaliro*
-g=1; l=1;
-model = @(t,x,u) [x(2); -g/l * sin(x(1))];
-
-init_cond = [-pi/2, pi/2; -pi/2, pi/2];
-input_range = [];
-cp_array = [];
-
-phi = '[]!a';
-
-ii = 1;
-preds(ii).str='a';
-preds(ii).A = [1,0; 0,1];
-preds(ii).b = [-pi; -pi];
-
-time = 2;
-
-opt = staliro_options();
-opt.runs = 1;
-opt.spec_space = 'X';
-opt.ode_solver = 'ode45';
-opt.falsification=0;
-opt.optimization_solver = 'UR_Taliro';
-opt.optim_params.n_tests = 50;
 
 % Make the un-updated values on the value map transparent. If not, then
 % we see the reward function underneath.
@@ -92,7 +88,7 @@ if doVid
     open(writerObj);
 end
 
-%% Discretize the state so we can start to learn a value map
+% Discretize the state so we can start to learn a value map
 % State1 is angle -- play with these for better results. Faster convergence
 % with rough discretization, less jittery with fine.
 x1 = -pi:0.05:pi;
@@ -129,7 +125,6 @@ end
 R = rewardFunc(states(:,1),states(:,2)); % Initialize the "cost" of a given state to be quadratic error from the goal state. Note the signs mean that -angle with +velocity is better than -angle with -velocity
 Q = repmat(R,[1,3]); % Q is length(x1) x length(x2) x length(actions) - IE a bin for every action-state combination.
 
-
 % V will be the best of the Q actions at every state. This is only
 % important for my plotting. Not algorithmically significant. I leave
 % values we haven't updated at 0, so they appear as blue (unexplored) areas
@@ -137,7 +132,7 @@ Q = repmat(R,[1,3]); % Q is length(x1) x length(x2) x length(actions) - IE a bin
 V = zeros(size(states,1),1);
 Vorig = reshape(max(Q,[],2),[length(x2),length(x1)]);
 
-%% Set up the pendulum plot
+% Set up the pendulum plot
 panel = figure;
 panel.Position = [680 558 1000 400];
 panel.Color = [1 1 1];
@@ -158,7 +153,7 @@ plot(0.001,0,'.k','MarkerSize',50); % Pendulum axis point
 
 hold off
 
-%% Set up the state-value map plot (displays the value of the best action at every point)
+% Set up the state-value map plot (displays the value of the best action at every point)
 colormap('hot');
 subplot(1,4,[2:4]);
 hold on
@@ -181,7 +176,7 @@ pathmap = plot(NaN,NaN,'.g','MarkerSize',30); % The green marker that travels th
 map.CData = V;
 hold off
 
-%% Start learning!
+% Start learning!
 
 % Number of episodes or "resets"
 for episodes = 1:maxEpi
@@ -207,28 +202,19 @@ for episodes = 1:maxEpi
         % 2) Pick a random action (EXPLORATION)
         if (rand()>epsilon || episodes == maxEpi) && rand()<=successRate % Pick according to the Q-matrix it's the last episode or we succeed with the rand()>epsilon check. Fail the check if our action doesn't succeed (i.e. simulating noise)
             [~,aIdx] = max(Q(sIdx,:)); % Pick the action the Q matrix thinks is best!
+            T = actions(aIdx);
         else
-            % Use sTaliro to get falsifying trajectory
-            [results, history] = staliro(model, init_cond, input_range, cp_array, phi, preds, time, opt);
-            bestRun = results.optRobIndex;
-            
-            % Convert this bestRun into an action: either go right, left or stay
-            % If sTaliro suggests a point where theta is larger than my
-            % current location, move right. Otherwise, left. Or stay in the
-            % same spot.
-            x = (results.run(bestRun).bestSample);
-            if x(1) > z1(1)
-                aIdx = 3;
-            elseif x(1) < z1(1)
-                aIdx = 2;
-            else
-                aIdx = 1;
-            end
-            
-            aIdx = randi(length(actions),1); % Random action!
+            % Starting from the pendulum's current location
+            init_cond = [-z1(1),z1(1);-z1(2),z1(2)];
+            input_range = [-0.001, 0.001];
+            % Explore intelligently using sTaLiRo. 
+            [results, history] = staliro(model,init_cond,input_range,cp_array,phi,preds,time,opt);
+            [val loc] = min(history.rob);
+
+            %disp(z1);
+            %disp(history.samples(loc,1:3));
+            T = round(history.samples(loc,3));
         end
-        %actions = [0, -tLim, tLim];
-        T = actions(aIdx);
         
         %% STEP DYNAMICS FORWARD
         
@@ -333,7 +319,6 @@ if doVid
     close(writerObj);
 end
 
-end
 
 function zdot = Dynamics(z,T)
 % Pendulum with motor at the joint dynamics. IN - [angle,rate] & torque.
