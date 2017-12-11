@@ -205,8 +205,9 @@ for episodes = 1:maxEpi
             T = actions(aIdx);
         else
             % Starting from the pendulum's current location
-            init_cond = [-z1(1),z1(1);-z1(2),z1(2)];
-            input_range = [-0.001, 0.001];
+            deltaZ = 0.0001;
+            init_cond = [z1(1)-deltaZ,z1(1)+deltaZ;z1(2)-deltaZ,z1(2)+deltaZ];
+            input_range = [-1, 1];
             % Explore intelligently using sTaLiRo. 
             [results, history] = staliro(model,init_cond,input_range,cp_array,phi,preds,time,opt);
             [val loc] = min(history.rob);
