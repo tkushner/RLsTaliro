@@ -80,10 +80,10 @@ actions = [0, -tLim, tLim]; % Only 3 options, Full blast one way, the other way,
 transpMap = true;
 
 % Write to video?
-doVid = false;
+doVid = true;
 
 if doVid
-    writerObj = VideoWriter('qlearnVid.mp4','MPEG-4');
+    writerObj = VideoWriter('QlearnPendwithTaliro.mp4','MPEG-4');
     writerObj.FrameRate = 60;
     open(writerObj);
 end
@@ -300,6 +300,10 @@ for episodes = 1:maxEpi
                 set(map,'AlphaData',fullV~=Vorig); % Some spots have not changed from original. If not, leave them transparent.
             end
             drawnow;
+            
+            if ~ishandle(panel)
+                break;
+            end
             
             % Take a video frame if turned on.
             if doVid
