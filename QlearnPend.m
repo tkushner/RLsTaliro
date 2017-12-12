@@ -1,4 +1,4 @@
-function QlearnPend
+
 %% Example reinforcement learning - Q-learning code
 % Learn a control policy to optimally swing a pendulum from vertical down,
 % to vertical up with torque limits and (potentially) noise. Both the
@@ -291,7 +291,6 @@ if doVid
     close(writerObj);
 end
 
-end
 
 function zdot = Dynamics(z,T)
 % Pendulum with motor at the joint dynamics. IN - [angle,rate] & torque.
