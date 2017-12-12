@@ -87,23 +87,10 @@ model2 = @(t,x) [x(2); g/l*sin(x(1))];
 x=XT2(:,1);
 v=XT2(:,2);
 
-% Write to video?
-doVid = true;
-
-if doVid
-    writerObj = VideoWriter('sTaliro.mp4','MPEG-4');
-    writerObj.FrameRate = 60;
-    open(writerObj);
-end
-
 cartesianx=-sin(x);
 cartesiany=cos(x);
 for i = 1 : tEnd
-<<<<<<< HEAD
-    figure(6)
-=======
-    panel = figure(2);
->>>>>>> d4f9ad08414a0702530c0bdccd5255c2626171d0
+    figure(1)
     subplot(2,1,1)
     plotarrayx = [0 cartesianx(i)];
     plotarrayy = [0 cartesiany(i)];
@@ -121,29 +108,20 @@ for i = 1 : tEnd
         ylabel('velocity','fontsize',12)
         hold on  % Holds previous values
         axis([0 i+1 min(v)-1 max(v)+1])
-    
-    if doVid
-        frame = getframe(panel);
-        writeVideo(writerObj,frame);
-    end    
+        
     
     pause(.1)  % Shows results at each time interval
     movie(i)=getframe(gcf);
 end
 %%
-v = VideoWriter('Taliro.avi');
+v = VideoWriter('TaliroMovie2.avi');
+v.FrameRate=20;
 
-<<<<<<< HEAD
 open(v)
-writeVideo(v,movie)
+writeVideo(v,movie1.movie9)
 
 close(v)
-=======
-if doVid
-    close(writerObj);
-end
 
->>>>>>> d4f9ad08414a0702530c0bdccd5255c2626171d0
 %% RL with Taliro
 %% SETTINGS
 

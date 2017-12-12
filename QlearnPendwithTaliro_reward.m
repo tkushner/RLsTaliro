@@ -126,6 +126,15 @@ end
 if doVid
     close(writerObj);
 end
+%%
+%%
+v = VideoWriter('RLmovieTK.avi');
+v.FrameRate=60;
+
+open(v)
+writeVideo(v,movieRL)
+
+close(v)
 
 %% RL with Taliro
 %% SETTINGS
@@ -170,11 +179,6 @@ actions = [0, -tLim, tLim]; % Only 3 options, Full blast one way, the other way,
 % we see the reward function underneath.
 transpMap = true;
 
-if doVid
-    writerObj = VideoWriter('QlearnPend.mp4','MPEG-4');
-    writerObj.FrameRate = 60;
-    open(writerObj);
-end
 
 % Discretize the state so we can start to learn a value map
 % State1 is angle -- play with these for better results. Faster convergence
@@ -268,6 +272,7 @@ hold off
 
 % Start learning!
 
+movieIdx=1;
 % Number of episodes or "resets"
 for episodes = 1:maxEpi
     
@@ -387,13 +392,11 @@ for episodes = 1:maxEpi
             end
             
             % Take a video frame if turned on.
-            if doVid
-                frame = getframe(panel);
-                writeVideo(writerObj,frame);
-            end
+            movieRL(movieIdx)=getframe(gcf);
+            movieIdx=movieIdx+1;
         end
         
-        % End this episode if we've hit the goal point (upright pendulum).
+%         End this episode if we've hit the goal point (upright pendulum).
         if success
             break;
         end
@@ -414,3 +417,4 @@ L = 1;
 z = z';
 zdot = [z(2) g/L*sin(z(1))+T];
 end
+%%
