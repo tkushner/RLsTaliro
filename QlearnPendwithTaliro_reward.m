@@ -14,20 +14,17 @@ input_range = [-1,1];
 cp_array = [30];
 
 %phi = '[]!(a)';
-%phi = '<>_[20,40) a';
-phi = '[]_(20,40) !a';
+phi = '<>_[20,40) a ';
 
 ii = 1;
 preds(ii).str='a';
 preds(ii).A = [0,-1];
 preds(ii).b = [-2];
-%preds(ii).loc = [1:50];
 
 ii = 2;
 preds(ii).str='b';
 preds(ii).A = [0,-1];
 preds(ii).b = [2];
-preds(ii).loc = [1:50];
 
 time = 50;
 
@@ -38,7 +35,7 @@ opt.spec_space = 'X';
 opt.ode_solver = 'ode45';
 opt.falsification=0;
 opt.optimization_solver = 'UR_Taliro';
-opt.optim_params.n_tests = 500;
+opt.optim_params.n_tests = 100;
 [results, history] = staliro(model,init_cond,input_range,cp_array,phi,preds,time,opt);
 
 % Get Falsifying trajectory
@@ -82,10 +79,10 @@ model2 = @(t,x) [x(2); g/l*sin(x(1))];
 % x = w(:,1);     % extract positions from first column of w matrix
 % v = w(:,2);     % extract velocities from second column of w matrix
 
-[T2,XT2] = SimFunctionMdl(model,init_cond,input_range,cp_array,bestrunTaliro,time,opt);
+[T1,XT1] = SimFunctionMdl(model,init_cond,input_range,cp_array,bestrunTaliro,time,opt);
 
-x=XT2(:,1);
-v=XT2(:,2);
+x=XT1(:,1);
+v=XT1(:,2);
 
 % Write to video?
 doVid = true;
@@ -99,11 +96,7 @@ end
 cartesianx=-sin(x);
 cartesiany=cos(x);
 for i = 1 : tEnd
-<<<<<<< HEAD
-    figure(6)
-=======
     panel = figure(2);
->>>>>>> d4f9ad08414a0702530c0bdccd5255c2626171d0
     subplot(2,1,1)
     plotarrayx = [0 cartesianx(i)];
     plotarrayy = [0 cartesiany(i)];
@@ -128,22 +121,12 @@ for i = 1 : tEnd
     end    
     
     pause(.1)  % Shows results at each time interval
-    movie(i)=getframe(gcf);
 end
-%%
-v = VideoWriter('Taliro.avi');
 
-<<<<<<< HEAD
-open(v)
-writeVideo(v,movie)
-
-close(v)
-=======
 if doVid
     close(writerObj);
 end
 
->>>>>>> d4f9ad08414a0702530c0bdccd5255c2626171d0
 %% RL with Taliro
 %% SETTINGS
 
