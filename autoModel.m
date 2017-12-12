@@ -102,17 +102,20 @@ figure
 [T1,XT1,YT1,IT1] = SimSimulinkMdl(model,init_cond,input_range,cp_array,results.run(results.optRobIndex).bestSample(:,1),time,opt);
 subplot(3,1,1)
 plot(IT1(:,1),IT1(:,2))
+set(gca,'FontSize',14);
 title('Throttle','FontSize',16)
 subplot(3,1,2)
 plot(T1,YT1(:,2))
 hold on 
 plot([0 30],[4500 4500],'r');
+set(gca,'FontSize',14);
 title('RPM','FontSize',16)
 subplot(3,1,3)
 plot(T1,YT1(:,1))
 hold on 
 %plot([0 30],[120 120],'r');
 plot([0 30],[70 70],'r');
+set(gca,'FontSize',14);
 title('Speed','FontSize',16)
 
 % cd('..')
